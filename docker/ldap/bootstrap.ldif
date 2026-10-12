@@ -1,0 +1,85 @@
+# DEVELOPMENT ONLY - synthetic directory entries. No real people.
+# Passwords for every account: Dev-Password-2026
+
+dn: ou=people,dc=institute,dc=test
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=groups,dc=institute,dc=test
+objectClass: organizationalUnit
+ou: groups
+
+dn: uid=asharma,ou=people,dc=institute,dc=test
+objectClass: inetOrgPerson
+uid: asharma
+cn: Anita Sharma
+givenName: Anita
+sn: Sharma
+mail: asharma@institute.test
+employeeNumber: E1001
+departmentNumber: CSE
+title: Professor
+employeeType: faculty
+userPassword: Dev-Password-2026
+
+dn: uid=rverma,ou=people,dc=institute,dc=test
+objectClass: inetOrgPerson
+uid: rverma
+cn: Rahul Verma
+givenName: Rahul
+sn: Verma
+mail: rverma@institute.test
+employeeNumber: E1002
+departmentNumber: CC
+title: System Administrator
+employeeType: staff
+userPassword: Dev-Password-2026
+
+dn: uid=pkumar,ou=people,dc=institute,dc=test
+objectClass: inetOrgPerson
+uid: pkumar
+cn: Priya Kumar
+givenName: Priya
+sn: Kumar
+mail: pkumar@institute.test
+employeeNumber: E1003
+departmentNumber: CSE
+title: Head of Department
+employeeType: faculty
+userPassword: Dev-Password-2026
+
+dn: uid=s2024001,ou=people,dc=institute,dc=test
+objectClass: inetOrgPerson
+uid: s2024001
+cn: Karan Singh
+givenName: Karan
+sn: Singh
+mail: s2024001@students.institute.test
+employeeNumber: 2024IMT001
+departmentNumber: CSE
+employeeType: student
+userPassword: Dev-Password-2026
+
+dn: uid=disabled1,ou=people,dc=institute,dc=test
+objectClass: inetOrgPerson
+uid: disabled1
+cn: Former Staff
+sn: Staff
+mail: disabled1@institute.test
+employeeNumber: E0999
+employeeType: staff
+description: account-disabled
+userPassword: Dev-Password-2026
+
+# Network access groups checked by FreeRADIUS / VPN (Computer Centre
+# provisioning adds and removes members). groupOfNames needs one member,
+# so each holds a placeholder.
+dn: cn=wifi-users,ou=groups,dc=institute,dc=test
+objectClass: groupOfNames
+cn: wifi-users
+member: cn=placeholder,ou=groups,dc=institute,dc=test
+
+dn: cn=vpn-users,ou=groups,dc=institute,dc=test
+objectClass: groupOfNames
+cn: vpn-users
+member: cn=placeholder,ou=groups,dc=institute,dc=test

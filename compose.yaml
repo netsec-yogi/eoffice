@@ -1,0 +1,162 @@
+name: digital-workflow
+
+# Shared definition for every container that runs the Laravel codebase.
+x-php: &php
+  image: abviiitm/workflow-php:8.3
+  restart: unless-stopped
+  volumes:
+    - .:/var/www/html
+    - composer-cache:/home/www-data/.composer
+    # CA of the development directory, so StartTLS certificate validation is
+    # exercised in development exactly as in production.
+    - ldap-certs:/etc/ldap-certs:ro
+  # Configuration comes from .env alone. Exporting DB_* here would shadow it
+  # at OS level, which PHPUnit cannot override -- the test suite would then
+  # run against, and RefreshDatabase would wipe, the development database.
+  networks: [workflow]
+
+services:
+  app:
+    <<: *php
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-8100}:80"
+    volumes:
+      # nginx sees only the web root -- never app code, .env or private
+      # storage. Every document is streamed through an authorising controller.
+      - ./public:/var/www/html/public:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on: [app]
+    networks: [workflow]
+
+  queue:
+    <<: *php
+    command: php artisan queue:work redis --queue=workflow,notifications,integrations,default --tries=3 --backoff=10 --max-time=3600
+    depends_on:
+      app:
+        condition: service_started
+
+  scheduler:
+    <<: *php
+    command: php artisan schedule:work
+    depends_on:
+      app:
+        condition: service_started
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    ports:
+      # Bound to localhost only: the database is never reachable from the LAN.
+      - "127.0.0.1:${FORWARD_DB_PORT:-54330}:5432"
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-digital_workflow}
+      POSTGRES_USER: ${DB_USERNAME:-workflow}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-secret}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/10-testing-db.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-workflow} -d ${DB_DATABASE:-digital_workflow}"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+    networks: [workflow]
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks: [workflow]
+
+  # Catches every outbound mail in development.
+  mailpit:
+    image: axllent/mailpit:latest
+    restart: unless-stopped
+    ports:
+      - "${MAILPIT_UI_PORT:-8028}:8025"
+    networks: [workflow]
+
+  # DEVELOPMENT ONLY: a stand-in for the institute's OpenLDAP directory with
+  # synthetic accounts (docker/ldap/bootstrap.ldif). Production points
+  # LDAP_HOSTS at the real directory and never runs this container.
+  ldap-certs:
+    image: alpine:3.20
+    restart: "no"
+    volumes:
+      - ldap-certs:/certs
+      - ./docker/ldap/make-certs.sh:/make-certs.sh:ro
+    command: sh /make-certs.sh
+    networks: [workflow]
+
+  ldap:
+    image: osixia/openldap:1.5.0
+    hostname: ldap
+    restart: unless-stopped
+    command: --copy-service
+    environment:
+      LDAP_ORGANISATION: "Example Institute (development)"
+      LDAP_DOMAIN: institute.test
+      LDAP_ADMIN_PASSWORD: ${LDAP_DEV_ADMIN_PASSWORD:-dev-admin-secret}
+      LDAP_READONLY_USER: "true"
+      LDAP_READONLY_USER_USERNAME: ${LDAP_DEV_READONLY_USER:-workflow-bind}
+      LDAP_READONLY_USER_PASSWORD: ${LDAP_DEV_READONLY_PASSWORD:-dev-bind-secret}
+      LDAP_TLS_VERIFY_CLIENT: never
+      LDAP_TLS_ENFORCE: "false"
+      LDAP_TLS_CRT_FILENAME: ldap.crt
+      LDAP_TLS_KEY_FILENAME: ldap.key
+      LDAP_TLS_CA_CRT_FILENAME: ca.crt
+      LDAP_TLS_DH_PARAM_FILENAME: dhparam.pem
+    volumes:
+      - ./docker/ldap/bootstrap.ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom/50-people.ldif:ro
+      - ldap-certs:/container/service/slapd/assets/certs
+    depends_on:
+      ldap-certs:
+        condition: service_completed_successfully
+    networks: [workflow]
+
+  # Vite dev server, for frontend work with hot reload. Opt-in: `make dev`.
+  node:
+    image: node:22-alpine
+    profiles: [dev]
+    user: "${UID:-1000}:${GID:-1000}"
+    working_dir: /var/www/html
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "${VITE_PORT:-5175}:${VITE_PORT:-5175}"
+    environment:
+      VITE_PORT: ${VITE_PORT:-5175}
+    command: sh -c "npm install && npm run dev"
+    networks: [workflow]
+
+volumes:
+  postgres-data:
+  redis-data:
+  composer-cache:
+  ldap-certs:
+
+networks:
+  workflow:
+    driver: bridge

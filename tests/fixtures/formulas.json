@@ -1,0 +1,14 @@
+[
+  {"name": "arithmetic precedence", "formula": "2 + 3 * 4", "context": {}, "expected": 14},
+  {"name": "parentheses", "formula": "(2 + 3) * 4", "context": {}, "expected": 20},
+  {"name": "unary minus", "formula": "-a + 10", "context": {"a": 3}, "expected": 7},
+  {"name": "fields", "formula": "fare + da * days_count", "context": {"fare": "1200", "da": 500, "days_count": 3}, "expected": 2700},
+  {"name": "missing field gives null", "formula": "fare + da", "context": {"fare": 10}, "expected": null},
+  {"name": "division by zero gives null", "formula": "a / b", "context": {"a": 1, "b": 0}, "expected": null},
+  {"name": "sum of table column", "formula": "sum(items.amount)", "context": {"items": [{"amount": 100}, {"amount": "250.5"}, {"amount": null}]}, "expected": 350.5},
+  {"name": "sum of empty table", "formula": "sum(items.amount)", "context": {}, "expected": 0},
+  {"name": "count rows", "formula": "count(items)", "context": {"items": [{}, {}, {}]}, "expected": 3},
+  {"name": "min max round", "formula": "round(max(a, b) / 3, 2) + min(a, b)", "context": {"a": 10, "b": 4}, "expected": 7.33},
+  {"name": "days inclusive", "formula": "days(from, to)", "context": {"from": "2026-10-01", "to": "2026-10-05"}, "expected": 5},
+  {"name": "days missing", "formula": "days(from, to)", "context": {"from": "2026-10-01"}, "expected": null}
+]

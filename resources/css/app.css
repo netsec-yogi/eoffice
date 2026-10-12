@@ -1,0 +1,507 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/plus-jakarta-sans';
+@plugin '@tailwindcss/forms';
+
+@source '../views';
+@source '../js';
+
+/* Dark mode is class-based (<html class="dark">) so it can be user-selectable. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+ | Digital Workflow design system (shared with the institute's other portals).
+ |
+ | Pages and components use SEMANTIC tokens (bg-surface, text-ink, ring-line…),
+ | never raw greys, so the whole UI re-themes by changing the variables
+ | below -- that is all dark mode needs. Brand and status ramps are
+ | identity colours and stay fixed.
+ */
+:root {
+    --canvas: #f5f5fa; /* page background */
+    --surface: #ffffff; /* cards, panels, inputs */
+    --surface-muted: #f8f8fc; /* table headers, subtle fills */
+    --surface-sunken: #efeff6; /* chips, tracks, hovers */
+    --ink: #16141f; /* headings, primary text */
+    --ink-soft: #2e2b3c; /* body text */
+    --muted: #6a6780; /* secondary text */
+    --subtle: #9c99ad; /* placeholders, captions */
+    --line: #e6e5ef; /* borders */
+    --line-strong: #d3d1e0; /* input borders */
+    --line-soft: #f0eff6; /* dividers inside cards */
+    --sidebar: #f5f5fa;
+    --topbar: #ffffff;
+    --shadow-card: 0 1px 2px 0 rgb(22 20 50 / 0.04), 0 4px 16px -4px rgb(22 20 50 / 0.06);
+    --shadow-pop: 0 18px 40px -12px rgb(22 20 50 / 0.22), 0 4px 10px -4px rgb(22 20 50 / 0.08);
+}
+
+/* Dark theme: <html class="dark">, chosen in the account menu (public/js/theme.js). */
+.dark {
+    --canvas: #0c0b12;
+    --surface: #16151f;
+    --surface-muted: #1b1a26;
+    --surface-sunken: #23222f;
+    --ink: #f2f1f8;
+    --ink-soft: #d6d4e2;
+    --muted: #9c99b0;
+    --subtle: #6d6a82;
+    --line: #2b2a3a;
+    --line-strong: #3a3850;
+    --line-soft: #211f2d;
+    --sidebar: #0c0b12;
+    --topbar: #12111a;
+    --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+    --shadow-pop: 0 18px 40px -12px rgb(0 0 0 / 0.7);
+
+    /*
+     | Tint ramps flip in the dark: the light ends (used as badge and chip
+     | backgrounds) become dark tints, the dark ends (used as text on
+     | them) become light. Mid tones (buttons, icons) are unchanged; solid
+     | brand surfaces use the fixed deep-* colours instead.
+     */
+    --color-brand-50: #1d1a3f;
+    --color-brand-100: #262153;
+    --color-brand-200: #332c6e;
+    --color-brand-700: #b9b1ff;
+    --color-brand-800: #cfc9ff;
+    --color-brand-900: #e2deff;
+    --color-brand-950: #f1efff;
+    --color-emerald-50: #0e2b23;
+    --color-emerald-100: #12382d;
+    --color-emerald-200: #18493b;
+    --color-emerald-700: #6ee7b7;
+    --color-emerald-800: #a7f3d0;
+    --color-emerald-900: #d1fae5;
+    --color-amber-50: #2e2410;
+    --color-amber-100: #3b2e12;
+    --color-amber-200: #4d3c17;
+    --color-amber-700: #fcd34d;
+    --color-amber-800: #fde68a;
+    --color-amber-900: #fef3c7;
+    --color-red-50: #33171a;
+    --color-red-100: #431c20;
+    --color-red-200: #5a2429;
+    --color-red-700: #fca5a5;
+    --color-red-800: #fecaca;
+    --color-red-900: #fee2e2;
+    --color-violet-50: #241a3d;
+    --color-violet-700: #c4b5fd;
+    --color-accent-50: #3a1422;
+}
+
+@theme inline {
+    --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', Arial, sans-serif;
+
+    --color-canvas: var(--canvas);
+    --color-surface: var(--surface);
+    --color-surface-muted: var(--surface-muted);
+    --color-surface-sunken: var(--surface-sunken);
+    --color-ink: var(--ink);
+    --color-ink-soft: var(--ink-soft);
+    --color-muted: var(--muted);
+    --color-subtle: var(--subtle);
+    --color-line: var(--line);
+    --color-line-strong: var(--line-strong);
+    --color-line-soft: var(--line-soft);
+    --color-sidebar: var(--sidebar);
+    --color-topbar: var(--topbar);
+
+    --shadow-card: var(--shadow-card);
+    --shadow-pop: var(--shadow-pop);
+}
+
+@theme {
+    /* Indigo-violet: 600 on white is 6.4:1 (WCAG AA for text). */
+    --color-brand-50: #eff5ff;
+    --color-brand-100: #dbe8fe;
+    --color-brand-200: #bfd6fe;
+    --color-brand-300: #93bbfd;
+    --color-brand-400: #609afa;
+    --color-brand-500: #3b7bf6;
+    --color-brand-600: #2563eb;
+    --color-brand-700: #1d4fd7;
+    --color-brand-800: #1e40af;
+    --color-brand-900: #1e3a8a;
+    --color-brand-950: #172554;
+
+    /* Fixed deep brand for solid hero surfaces: does not change with the theme. */
+    --color-deep-700: #1d4fd7;
+    --color-deep-800: #1e40af;
+    --color-deep-900: #1e3a8a;
+    --color-deep-950: #172554;
+
+    /* Coral-pink accent: likes, highlights, the occasional call to action. */
+    --color-accent-50: #fff0f4;
+    --color-accent-400: #ff7da0;
+    --color-accent-500: #f5487a;
+    --color-accent-600: #dc2a62;
+
+    --radius-card: 1.25rem;
+
+    --animate-fade-up: fade-up 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+    --animate-pop: pop 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+@keyframes fade-up {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes pop {
+    0% {
+        transform: scale(1);
+    }
+    40% {
+        transform: scale(1.35);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* A panel: the one container style used across the app. */
+@utility card {
+    border-radius: var(--radius-card);
+    background-color: var(--surface);
+    box-shadow: var(--shadow-card);
+}
+
+/* Interactive card (links, selectable tiles): lifts on hover. */
+@utility card-hover {
+    transition:
+        box-shadow 200ms,
+        transform 200ms;
+    &:hover {
+        box-shadow: var(--shadow-pop);
+        transform: translateY(-2px);
+    }
+}
+
+/* Tactile press feedback for buttons and tappable tiles. */
+@utility press {
+    transition: transform 120ms;
+    &:active {
+        transform: scale(0.97);
+    }
+}
+
+/* Admin-edited rich text on the landing page (server-sanitised: p, strong, em, a, lists). */
+@utility rich-copy {
+    & > * + * {
+        margin-top: 0.75em;
+    }
+    & a {
+        font-weight: 600;
+        text-decoration: underline;
+        text-underline-offset: 3px;
+    }
+    & ul {
+        list-style: disc;
+        padding-left: 1.25em;
+    }
+    & ol {
+        list-style: decimal;
+        padding-left: 1.25em;
+    }
+    & strong {
+        font-weight: 700;
+    }
+}
+
+@utility scrollbar-none {
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+@layer base {
+    html {
+        -webkit-font-smoothing: antialiased;
+        scroll-behavior: smooth;
+        /* Keep anything scrolled to or focused clear of the sticky top bar. */
+        scroll-padding-top: 5rem;
+    }
+
+    /* Below 1024px the bottom tab bar is fixed: keep focused/scrolled-to controls above it (WCAG 2.4.11). */
+    @media (max-width: 1023px) {
+        html:has(nav[aria-label='Primary']) {
+            scroll-padding-bottom: 6rem;
+        }
+    }
+
+    h1,
+    h2,
+    h3 {
+        letter-spacing: -0.015em;
+    }
+
+    /* Modals and drawers animate in. */
+    dialog[open] {
+        animation: fade-up 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    dialog::backdrop {
+        animation: backdrop-in 0.2s ease-out;
+    }
+
+    body {
+        background-color: var(--canvas);
+        color: var(--ink-soft);
+        font-feature-settings: 'cv11', 'ss01';
+    }
+
+    :focus-visible {
+        outline: 2px solid var(--color-brand-500);
+        outline-offset: 2px;
+    }
+
+    /* The forms plugin paints fields white; follow the theme instead. */
+    /* :root raises specificity above the plugin's; utilities still win (later layer). */
+    :root input:where(:not([type='checkbox'], [type='radio'], [type='range'], [type='color'])),
+    :root textarea,
+    :root select {
+        background-color: var(--surface);
+        color: var(--ink);
+    }
+
+    [type='checkbox'],
+    [type='radio'] {
+        color: var(--color-brand-600);
+        border-color: var(--line-strong);
+        background-color: var(--surface);
+    }
+
+    /* Native pickers follow the theme. */
+    .dark {
+        color-scheme: dark;
+    }
+}
+
+/* Inertia progress bar */
+#nprogress .bar {
+    background: var(--color-accent-500) !important;
+}
+
+@keyframes backdrop-in {
+    from {
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+    *,
+    ::before,
+    ::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Typography for server-rendered story Markdown. */
+.story-body > * + * {
+    margin-top: 1.1em;
+}
+.story-body {
+    line-height: 1.75;
+}
+.story-body h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-top: 1.6em;
+}
+.story-body h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--ink);
+    margin-top: 1.4em;
+}
+.story-body a {
+    color: var(--color-brand-600);
+    text-decoration: underline;
+}
+.story-body ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+}
+.story-body ol {
+    list-style: decimal;
+    padding-left: 1.5rem;
+}
+.story-body blockquote {
+    border-left: 4px solid var(--color-brand-400);
+    padding-left: 1rem;
+    font-style: italic;
+    color: var(--muted);
+}
+.story-body code {
+    background: var(--surface-sunken);
+    padding: 0.1em 0.35em;
+    border-radius: 0.25rem;
+    font-size: 0.9em;
+}
+
+/*
+ | Data tables: a plain <table class="data-table"> (usually inside
+ | DataTable.vue) gets the house style. Cells stay readable, not dense.
+ */
+@layer components {
+    .data-table {
+        width: 100%;
+        min-width: 100%;
+        font-size: 0.875rem;
+        border-collapse: collapse;
+    }
+    .data-table thead th {
+        background-color: var(--surface-muted);
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        text-align: left;
+        white-space: nowrap;
+        padding: 0.7rem 1rem;
+        border-bottom: 1px solid var(--line);
+    }
+    .data-table tbody td {
+        padding: 0.8rem 1rem;
+        border-bottom: 1px solid var(--line-soft);
+        vertical-align: middle;
+        color: var(--ink-soft);
+    }
+    .data-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+    .data-table tbody tr {
+        transition: background-color 120ms;
+    }
+    .data-table tbody tr:hover {
+        background-color: color-mix(in oklab, var(--surface-muted) 70%, transparent);
+    }
+    .data-table th:first-child,
+    .data-table td:first-child {
+        padding-left: 1.25rem;
+    }
+    .data-table th:last-child,
+    .data-table td:last-child {
+        padding-right: 1.25rem;
+    }
+}
+
+/*
+ | Below 640px a .data-table reflows into stacked cards: one per row, each
+ | cell labelled with its column header (DataTable.vue sets data-label).
+ */
+@media (max-width: 639px) {
+    .data-table thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+    }
+    .data-table,
+    .data-table tbody,
+    .data-table tr,
+    .data-table td {
+        display: block;
+    }
+    .data-table tbody tr {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--line);
+    }
+    .data-table tbody tr:last-child {
+        border-bottom: 0;
+    }
+    .data-table tbody td,
+    .data-table td:first-child,
+    .data-table td:last-child {
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+        align-items: baseline;
+        padding: 0.3rem 0;
+        border: 0;
+        text-align: right;
+    }
+    .data-table tbody td::before {
+        content: attr(data-label);
+        flex: none;
+        color: var(--muted);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-align: left;
+    }
+    .data-table tbody td[data-label='']::before {
+        content: none;
+    }
+    .data-table tbody td:first-child {
+        text-align: left;
+        justify-content: flex-start;
+    }
+    .data-table tbody td:first-child::before {
+        content: none;
+    }
+}
+
+@keyframes loading {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(300%);
+    }
+}
+
+@layer components {
+    .dropdown-item {
+        display: flex;
+        width: calc(100% - 0.75rem);
+        margin-inline: 0.375rem;
+        border-radius: 0.625rem;
+        align-items: center;
+        gap: 0.625rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        color: var(--ink-soft);
+        text-align: left;
+    }
+    .dropdown-item:hover,
+    .dropdown-item:focus-visible {
+        background-color: var(--surface-muted);
+        color: var(--ink);
+        outline: none;
+    }
+    .dropdown-item svg {
+        color: var(--subtle);
+    }
+}
+
+/* v-reveal (lib/reveal.ts): sections rise in as they scroll into view. */
+.reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition:
+        opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1),
+        transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.reveal.is-visible {
+    opacity: 1;
+    transform: none;
+}
+
+@media print {
+    .reveal {
+        opacity: 1;
+        transform: none;
+    }
+}
